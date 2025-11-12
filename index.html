@@ -54,6 +54,19 @@
       .btn-sertifikat:hover {
         background-color: #a52e74;
       }
+      .btn-aksi {
+        background-color: #be408a;
+        color: white;
+        border: none;
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        border-radius: 5px;
+        margin: 0 2px;
+        transition: 0.2s;
+      }
+      .btn-aksi:hover {
+        background-color: #a52e74;
+      }
     </style>
   </head>
   <body>
@@ -256,7 +269,12 @@
                 <td class="nama text-start">${nama}</td>
                 <td>${nik}</td>
                 ${kolom.map((v) => `<td>${v}</td>`).join("")}
-                <td><button class="btn btn-sertifikat" onclick="openModal('${nama}')">+ Sertifikat</button></td>
+                <td>
+                  <button class="btn-aksi" onclick="openModal('${nama}')">+ Sertifikat</button>
+                  <a href="detail.html?nama=${encodeURIComponent(
+                    nama
+                  )}" class="btn-aksi text-decoration-none">View</a>
+                </td>
               </tr>`;
           });
 
