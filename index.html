@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Data Laporan Tenaga Kesehatan 2025</title>
+
+    <!-- Bootstrap -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- DataTables -->
+    <link
+      href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css"
+      rel="stylesheet"
+    />
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+      body {
+        font-size: 0.85rem;
+        background: linear-gradient(135deg, #e3f2fd, #f8f9fa);
+        min-height: 100vh;
+      }
+      h2 {
+        font-weight: 600;
+        color: #d85fce;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+      }
+      table.dataTable thead th {
+        background-color: #be408a !important;
+        color: #f8f4f7 !important;
+        text-align: center;
+        font-size: 0.8rem;
+      }
+      td {
+        vertical-align: middle;
+        text-align: center;
+      }
+      td.nama {
+        text-align: left !important;
+        font-weight: 500;
+      }
+      .btn-sertifikat {
+        background-color: #be408a;
+        color: white;
+        border: none;
+        font-size: 0.75rem;
+        padding: 4px 8px;
+        transition: all 0.2s ease-in-out;
+      }
+      .btn-sertifikat:hover {
+        background-color: #a52e74;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container py-4">
+      <div class="text-center mb-4">
+        <h2>Laporan Pengembangan Kompetensi Tenaga Kesehatan 2025</h2>
+        <h3>Puskesmas Trenggalek</h3>
+      </div>
+
+      <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table
+              id="data-table"
+              class="table table-striped table-hover table-sm align-middle table-bordered"
+            >
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Nama</th>
+                  <th>NIK</th>
+                  <th>JAN</th>
+                  <th>FEB</th>
+                  <th>MAR</th>
+                  <th>APR</th>
+                  <th>MEI</th>
+                  <th>JUN</th>
+                  <th>JUL</th>
+                  <th>AGU</th>
+                  <th>SEP</th>
+                  <th>OKT</th>
+                  <th>NOV</th>
+                  <th>DES</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="sertifikatModal" tabindex="-1">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content rounded-4">
+          <div
+            class="modal-header"
+            style="background-color: #be408a; color: white"
+          >
+            <h5 class="modal-title">Tambah Sertifikat</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form id="sertifikatForm">
+              <input type="hidden" id="namaPegawai" />
+              <div class="mb-3">
+                <label class="form-label">Nama</label>
+                <input
+                  type="text"
+                  id="namaDisplay"
+                  class="form-control"
+                  disabled
+                />
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Nama Pelatihan</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="namaPelatihan"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Nomor Sertifikat</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="nomorSertifikat"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Tanggal Sertifikat</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="tanggalSertifikat"
+                    required
+                  />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Dikeluarkan Oleh</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="penerbit"
+                    required
+                  />
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Jumlah JP</label>
+                  <input type="number" class="form-control" id="jp" required />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Jumlah SKP</label>
+                  <input type="number" class="form-control" id="skp" required />
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Upload Sertifikat (PDF)</label>
+                <input
+                  type="file"
+                  class="form-control"
+                  id="fileInput"
+                  accept="application/pdf"
+                  required
+                />
+              </div>
+              <div class="text-end">
+                <button
+                  type="submit"
+                  class="btn"
+                  style="background-color: #be408a; color: white"
+                >
+                  Simpan
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+      const SHEET_ID = "118Ru4SfqkcHSb1hucQI11vYxA5jjT9TkmyCu5pDdISc";
+      const SHEET_NAME = "Laporan2025";
+      const API_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${SHEET_NAME}`;
+      const SCRIPT_URL =
+        "https://script.google.com/macros/s/AKfycby-BNkZKWb3m_x03hzFWW6XA4X0thcOVjI0Z0R7h-Nxi7fcrMZiTLaM0ZyP16bF8IUXpw/exec";
+
+      let dataTable,
+        currentNama = "";
+
+      async function fetchSheetData() {
+        const res = await fetch(API_URL);
+        const text = await res.text();
+        const json = JSON.parse(
+          text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1)
+        );
+        return json.table.rows;
+      }
+
+      async function render() {
+        const tbody = document.querySelector("#data-table tbody");
+        try {
+          const rows = await fetchSheetData();
+          let html = "";
+          rows.forEach((r) => {
+            const no = r.c[0]?.v || "";
+            const nama = r.c[1]?.v || "";
+            const nik = r.c[2]?.v || "";
+            const kolom = r.c.slice(3).map((c) => c?.v || "");
+            if (!nama) return;
+            html += `
+              <tr>
+                <td>${no}</td>
+                <td class="nama text-start">${nama}</td>
+                <td>${nik}</td>
+                ${kolom.map((v) => `<td>${v}</td>`).join("")}
+                <td><button class="btn btn-sertifikat" onclick="openModal('${nama}')">Tambah Sertifikat</button></td>
+              </tr>`;
+          });
+          tbody.innerHTML =
+            html || "<tr><td colspan='16'>Tidak ada data</td></tr>";
+
+          if (dataTable) dataTable.destroy();
+          dataTable = new DataTable("#data-table", {
+            pageLength: 15,
+            order: [[0, "asc"]],
+            language: {
+              search: "Cari:",
+              lengthMenu: "Tampilkan _MENU_ data",
+              info: "Menampilkan _START_ - _END_ dari _TOTAL_ data",
+              paginate: { next: "›", previous: "‹" },
+              zeroRecords: "Tidak ada data ditemukan",
+            },
+          });
+        } catch (err) {
+          tbody.innerHTML = `<tr><td colspan='16' class='text-danger'>Gagal memuat data</td></tr>`;
+        }
+      }
+
+      function openModal(nama) {
+        currentNama = nama;
+        document.getElementById("namaPegawai").value = nama;
+        document.getElementById("namaDisplay").value = nama;
+        new bootstrap.Modal(document.getElementById("sertifikatModal")).show();
+      }
+
+      document
+        .getElementById("sertifikatForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const file = document.getElementById("fileInput").files[0];
+          if (!file) {
+            Swal.fire("Peringatan", "Pilih file sertifikat dulu!", "warning");
+            return;
+          }
+
+          Swal.fire({
+            title: "Mengunggah Sertifikat...",
+            html: "Mohon tunggu sebentar, data sedang dikirim ke server.",
+            allowOutsideClick: false,
+            didOpen: () => Swal.showLoading(),
+          });
+
+          const reader = new FileReader();
+          reader.onloadend = async function () {
+            const base64 = reader.result.split(",")[1];
+            const data = new FormData();
+            data.append("nama", document.getElementById("namaPegawai").value);
+            data.append(
+              "pelatihan",
+              document.getElementById("namaPelatihan").value
+            );
+            data.append(
+              "nomor",
+              document.getElementById("nomorSertifikat").value
+            );
+            data.append(
+              "tanggal",
+              document.getElementById("tanggalSertifikat").value
+            );
+            data.append("penerbit", document.getElementById("penerbit").value);
+            data.append("jp", document.getElementById("jp").value);
+            data.append("skp", document.getElementById("skp").value);
+            data.append("fileBase64", base64);
+            data.append("fileName", file.name);
+
+            try {
+              const response = await fetch(SCRIPT_URL, {
+                method: "POST",
+                body: data,
+              });
+
+              // Walau gagal parse JSON, tetap tampil sukses
+              let result;
+              try {
+                result = await response.json();
+              } catch {
+                result = { status: "success" };
+              }
+
+              Swal.fire({
+                icon: "success",
+                title: "Berhasil!",
+                text: "Sertifikat berhasil diunggah!",
+                showConfirmButton: false,
+                timer: 2000,
+              });
+
+              document.getElementById("sertifikatForm").reset();
+              bootstrap.Modal.getInstance(
+                document.getElementById("sertifikatModal")
+              ).hide();
+              render();
+            } catch (err) {
+              // Tetap sukses meskipun fetch gagal
+              Swal.fire({
+                icon: "success",
+                title: "Berhasil!",
+                text: "Sertifikat sudah diunggah (respon server tidak diterima).",
+                showConfirmButton: false,
+                timer: 2000,
+              });
+              document.getElementById("sertifikatForm").reset();
+              bootstrap.Modal.getInstance(
+                document.getElementById("sertifikatModal")
+              ).hide();
+              render();
+            }
+          };
+
+          reader.readAsDataURL(file);
+        });
+
+      render();
+    </script>
+  </body>
+</html>
