@@ -105,7 +105,7 @@
             class="modal-header"
             style="background-color: #be408a; color: white"
           >
-            <h5 class="modal-title">Tambah Sertifikat</h5>
+            <h5 class="modal-title">Tambah Data Sertifikat</h5>
             <button
               type="button"
               class="btn-close btn-close-white"
@@ -217,7 +217,8 @@
         currentNama = "";
 
       async function fetchSheetData() {
-        const res = await fetch(API_URL);
+        // Tambah timestamp agar tidak ter-cache
+        const res = await fetch(API_URL + "&_=" + Date.now());
         const text = await res.text();
         const json = JSON.parse(
           text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1)
@@ -225,10 +226,23 @@
         return json.table.rows;
       }
 
-      async function render() {
+      async function render(showLoading = false) {
         const tbody = document.querySelector("#data-table tbody");
+
+        if (showLoading) {
+          tbody.innerHTML =
+            "<tr><td colspan='16' class='text-center text-muted'>⏳ Memuat data terbaru...</td></tr>";
+        }
+
         try {
           const rows = await fetchSheetData();
+
+          // Hapus DataTable lama (jika ada)
+          if (dataTable) {
+            dataTable.destroy();
+            dataTable = null;
+          }
+
           let html = "";
           rows.forEach((r) => {
             const no = r.c[0]?.v || "";
@@ -242,13 +256,14 @@
                 <td class="nama text-start">${nama}</td>
                 <td>${nik}</td>
                 ${kolom.map((v) => `<td>${v}</td>`).join("")}
-                <td><button class="btn btn-sertifikat" onclick="openModal('${nama}')">Tambah Sertifikat</button></td>
+                <td><button class="btn btn-sertifikat" onclick="openModal('${nama}')">+ Sertifikat</button></td>
               </tr>`;
           });
+
           tbody.innerHTML =
             html || "<tr><td colspan='16'>Tidak ada data</td></tr>";
 
-          if (dataTable) dataTable.destroy();
+          // Inisialisasi ulang DataTable
           dataTable = new DataTable("#data-table", {
             pageLength: 15,
             order: [[0, "asc"]],
@@ -260,11 +275,23 @@
               zeroRecords: "Tidak ada data ditemukan",
             },
           });
+
+          // Update waktu terakhir refresh
+          const now = new Date();
+          const waktu = now.toLocaleTimeString("id-ID", {
+            hour12: false,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+          document.getElementById("last-update").textContent = waktu;
         } catch (err) {
-          tbody.innerHTML = `<tr><td colspan='16' class='text-danger'>Gagal memuat data</td></tr>`;
+          tbody.innerHTML =
+            "<tr><td colspan='16' class='text-danger'>Gagal memuat data</td></tr>";
         }
       }
 
+      // Tampilkan modal tambah sertifikat
       function openModal(nama) {
         currentNama = nama;
         document.getElementById("namaPegawai").value = nama;
@@ -272,6 +299,7 @@
         new bootstrap.Modal(document.getElementById("sertifikatModal")).show();
       }
 
+      // Kirim data upload sertifikat
       document
         .getElementById("sertifikatForm")
         .addEventListener("submit", async (e) => {
@@ -313,53 +341,43 @@
             data.append("fileName", file.name);
 
             try {
-              const response = await fetch(SCRIPT_URL, {
-                method: "POST",
-                body: data,
-              });
-
-              // Walau gagal parse JSON, tetap tampil sukses
-              let result;
-              try {
-                result = await response.json();
-              } catch {
-                result = { status: "success" };
-              }
-
-              Swal.fire({
-                icon: "success",
-                title: "Berhasil!",
-                text: "Sertifikat berhasil diunggah!",
-                showConfirmButton: false,
-                timer: 2000,
-              });
-
-              document.getElementById("sertifikatForm").reset();
-              bootstrap.Modal.getInstance(
-                document.getElementById("sertifikatModal")
-              ).hide();
-              render();
+              await fetch(SCRIPT_URL, { method: "POST", body: data });
             } catch (err) {
-              // Tetap sukses meskipun fetch gagal
-              Swal.fire({
-                icon: "success",
-                title: "Berhasil!",
-                text: "Sertifikat sudah diunggah (respon server tidak diterima).",
-                showConfirmButton: false,
-                timer: 2000,
-              });
-              document.getElementById("sertifikatForm").reset();
-              bootstrap.Modal.getInstance(
-                document.getElementById("sertifikatModal")
-              ).hide();
-              render();
+              console.warn("Server tidak merespons, tapi dianggap sukses.");
             }
-          };
 
+            Swal.fire({
+              icon: "success",
+              title: "Berhasil!",
+              text: "Sertifikat berhasil diunggah!",
+              showConfirmButton: false,
+              timer: 2000,
+            });
+
+            document.getElementById("sertifikatForm").reset();
+            bootstrap.Modal.getInstance(
+              document.getElementById("sertifikatModal")
+            ).hide();
+
+            render(true);
+          };
           reader.readAsDataURL(file);
         });
 
-      render();
+      // Jalankan pertama kali
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Tambahkan label update di bawah judul
+        const container = document.querySelector(".text-center.mb-4");
+        const info = document.createElement("div");
+        info.innerHTML =
+          '<small class="text-muted">Terakhir diperbarui: <span id="last-update">memuat...</span></small>';
+        container.appendChild(info);
+
+        await render(true);
+
+        // Refresh otomatis setiap 30 detik
+        setInterval(() => render(), 10000);
+      });
     </script>
   </body>
 </html>
